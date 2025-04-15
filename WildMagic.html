@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wild Magic Surge</title>
+    <style>
+        @font-face {
+            font-family: 'Blackjack';
+            src: url('fonts/Blackjack.ttf') format('truetype');
+            font-display: swap;
+        }
+        
+        @font-face {
+            font-family: 'Veinline';
+            src: url('fonts/Veinline.ttf') format('truetype');
+            font-display: swap;
+        }
+        
+        body {
+            font-family: 'Blackjack', cursive;
+            color: #660000;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background: url('images/background.gif') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            font-size: 1.15em;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: transparent;
+        }
+        
+        h1 {
+            font-size: 3.45em;
+            text-shadow: 2px 2px 4px #000;
+            margin-bottom: 20px;
+            letter-spacing: 3px;
+            color: #660000;
+        }
+        
+        .subtitle {
+            font-size: 1.725em;
+            margin-bottom: 40px;
+            color: #fff;
+            text-shadow: 2px 2px 4px #000;
+        }
+
+        .deck-area {
+            position: relative;
+            height: 500px;
+            margin: 30px auto;
+        }
+        
+        .deck {
+            position: relative;
+            width: 350px;
+            height: 500px;
+            margin: 0 auto;
+            perspective: 1000px;
+        }
+        
+        .card {
+            position: absolute;
+            width: 264px;
+            height: 396px;
+            left: 50%;
+            top: 0;
+            transform: translateX(-50%);
+            border-radius: 20px;
+            transform-style: preserve-3d;
+            transition: transform 0.8s ease;
+            backface-visibility: hidden;
+            background-size: cover;
+            background-position: center;
+            border: 2px solid rgba(102, 0, 0, 0.3);
+        }
+        
+        .card-back {
+            background-image: url('images/card-back.png');
+            z-index: 2;
+            transform: translateX(-50%) rotateY(0deg);
+        }
+        
+        .card-front {
+            background-image: url('images/card-front.png');
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #3a2c1a;
+            font-family: 'Veinline', serif;
+            font-size: 1.65em;
+            transform: translateX(-50%) rotateY(180deg);
+            z-index: 1;
+            overflow: hidden;
+        }
+        
+        .card-content {
+            line-height: 1.5;
+            max-height: 320px;
+            overflow-y: auto;
+            padding: 10px;
+            width: 100%;
+        }
+        
+        .card-number {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-size: 38px;
+            font-weight: bold;
+            color: #8b0000;
+            font-family: 'Veinline', serif;
+        }
+        
+        button {
+            background-color: rgba(102, 0, 0, 0.9);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 1.5875em;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 30px 0;
+            transition: all 0.3s;
+            font-family: 'Blackjack', cursive;
+            border: 2px solid rgba(0, 0, 0, 0.2);
+        }
+        
+        button:hover {
+            background-color: rgba(82, 0, 0, 0.9);
+            transform: scale(1.05);
+        }
+        
+        button:disabled {
+            background-color: rgba(102, 102, 102, 0.9);
+            cursor: not-allowed;
+        }
+        
+        .status-bar {
+            margin-top: 30px;
+            color: #660000;
+            font-style: italic;
+            font-size: 1.3225em;
+            text-shadow: 1px 1px 2px #000;
+        }
+        
+        .deck-stack {
+            position: absolute;
+            width: 264px;
+            height: 396px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-image: url('images/card-back.png');
+            background-size: cover;
+            border-radius: 20px;
+            border: 2px solid rgba(102, 0, 0, 0.2);
+            z-index: 0;
+        }
+        
+        .shuffle-card {
+            position: absolute;
+            width: 264px;
+            height: 396px;
+            background-image: url('images/card-back.png');
+            background-size: cover;
+            border-radius: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 3;
+            display: none;
+            animation-duration: 0.4s;
+            animation-iteration-count: infinite;
+        }
+        
+        @keyframes shuffle1 {
+            0%, 100% { transform: translateX(-60%) rotate(-10deg); }
+            50% { transform: translateX(-40%) rotate(10deg); }
+        }
+        @keyframes shuffle2 {
+            0%, 100% { transform: translateX(-55%) rotate(-5deg) translateY(-10px); }
+            50% { transform: translateX(-45%) rotate(5deg) translateY(10px); }
+        }
+        @keyframes shuffle3 {
+            0%, 100% { transform: translateX(-50%) rotate(-8deg) translateY(5px); }
+            50% { transform: translateX(-50%) rotate(8deg) translateY(-5px); }
+        }
+        
+        .card-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .card-content::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        
+        .card-content::-webkit-scrollbar-thumb {
+            background: #660000;
+            border-radius: 10px;
+        }
+
+        .sound-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            color: #660000;
+            border: 1px solid #660000;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .music-btn {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            color: #660000;
+            border: 1px solid #660000;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .deck {
+                width: 300px;
+                height: 450px;
+            }
+            
+            .card, .deck-stack, .shuffle-card {
+                width: 225px;
+                height: 337px;
+            }
+            
+            h1 {
+                font-size: 2.5em;
+            }
+            
+            .subtitle {
+                font-size: 1.3em;
+            }
+            
+            button {
+                padding: 15px 30px;
+                font-size: 1.3em;
+            }
+            
+            .card-content {
+                font-size: 1.4em;
+                padding: 8px;
+                max-height: 260px;
+            }
+            
+            .card-front {
+                padding: 15px;
+                font-size: 1.4em;
+            }
+            
+            .card-number {
+                font-size: 32px;
+                top: 10px;
+                left: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>WILD MAGIC SURGE</h1>
+        <div class="subtitle">Draw a card to reveal your chaotic effect</div>
+        
+        <div class="deck-area">
+            <div class="deck">
+                <div class="deck-stack"></div>
+                <div class="card card-back" id="cardBack"></div>
+                <div class="card card-front" id="cardFront"></div>
+            </div>
+        </div>
+        
+        <button id="dealButton">DRAW CARD</button>
+        
+        <div class="status-bar" id="statusBar">
+            Deck ready - click DRAW CARD to begin
+        </div>
+    </div>
+
+    <audio id="shuffleSound" preload="auto">
+        <source src="sounds/shuffle.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="flipSound" preload="auto">
+        <source src="sounds/flip.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="magicSound" preload="auto">
+        <source src="sounds/magic.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="backgroundMusic" loop preload="auto">
+        <source src="sounds/background.mp3" type="audio/mpeg">
+    </audio>
+
+    <button id="soundToggle" class="sound-btn" title="Toggle sound effects">🔊</button>
+    <button id="musicToggle" class="music-btn" title="Toggle background music">🎵</button>
+
+    <script>
+        const wildMagicEffects = [
+            "1. Roll on this table at the start of each of your turns for the next minute, ignoring this result on subsequent rolls.",
+            "2. For the next minute, you can see any invisible creature within 60 feet of you.",
+            "3. A modron chosen and controlled by the DM appears in an unoccupied space within 5 feet of you, then disappears 1 minute later.",
+            "4. You cast Fireball as a 3rd-level spell centered on yourself.",
+            "5. You cast Magic Missile as a 5th-level spell at a random creature within 60 feet of you.",
+            "6. You grow a long beard made of feathers that remains until you sneeze, at which point the feathers explode out from your face.",
+            "7. You cast Grease centered on yourself.",
+            "8. Creatures have disadvantage on saving throws against the next spell you cast in the next minute that requires a saving throw.",
+            "9. Your skin turns a vibrant shade of blue. A Remove Curse spell can end this effect.",
+            "10. An eye appears on your forehead for the next minute. During that time, you have advantage on Wisdom (Perception) checks that rely on sight.",
+            "11. For the next minute, all your spells with a casting time of 1 action have a casting time of 1 bonus action.",
+            "12. You teleport up to 60 feet to an unoccupied space of your choice that you can see.",
+            "13. You are transported to the Astral Plane until the end of your next turn, after which time you return to the space you previously occupied or the nearest unoccupied space if that space is occupied.",
+            "14. Maximize the damage of the next damaging spell you cast within the next minute.",
+            "15. Roll a d10. Your height changes by a number of inches equal to the roll. If the roll is odd, you shrink. If the roll is even, you grow.",
+            "16. You cast Confusion centered on yourself.",
+            "17. For the next minute, you regain 5 hit points at the start of each of your turns.",
+            "18. You grow a third arm in the middle of your chest. The arm vanishes after 1 hour.",
+            "19. For the next minute, any object you grab that isn't being worn or carried by another creature disappears 1d6 hours later.",
+            "20. You gain resistance to all damage for the next minute.",
+            "21. A random creature within 60 feet of you becomes poisoned for 1d4 hours.",
+            "22. You glow with bright light in a 30-foot radius for the next minute. Any creature that ends its turn within 5 feet of you is blinded until the end of its next turn.",
+            "23. You cast Fog Cloud centered on yourself.",
+            "24. Up to three creatures you choose within 30 feet of you take 4d10 lightning damage.",
+            "25. You are frightened by the nearest creature until the end of your next turn.",
+            "26. Each creature within 30 feet of you becomes invisible for the next minute. The invisibility ends on a creature when it attacks or casts a spell.",
+            "27. You gain resistance to one damage type of the DM's choice for the next minute.",
+            "28. A spectral shield hovers near you for the next minute, granting you a +2 bonus to AC and immunity to Magic Missile.",
+            "29. You are immune to being intoxicated by alcohol for the next 5d6 days.",
+            "30. Your hair falls out but grows back within 24 hours.",
+            "31. For the next minute, any flammable object you touch that isn't being worn or carried by another creature bursts into flame.",
+            "32. You regain your lowest-level expended spell slot.",
+            "33. For the next minute, you must shout when you speak.",
+            "34. You cast Mirror Image.",
+            "35. You cast Fly on a random creature within 60 feet of you.",
+            "36. You become invisible for the next minute. During that time, other creatures can't hear you. The invisibility ends if you attack or cast a spell.",
+            "37. If you die within the next minute, you immediately come back to life as if by the Reincarnate spell.",
+            "38. Your size increases by one size category for the next minute.",
+            "39. You and all creatures within 30 feet of you gain vulnerability to piercing damage for the next minute.",
+            "40. You are surrounded by faint, ethereal music for the next minute.",
+            "41. You regain all expended sorcery points.",
+            "42. You turn into a potted plant until the start of your next turn. While a plant, you are incapacitated and have vulnerability to all damage.",
+            "43. For the next minute, you can teleport up to 20 feet as a bonus action on each of your turns.",
+            "44. You cast Levitate on yourself.",
+            "45. A unicorn controlled by the DM appears in a space within 5 feet of you, then disappears 1 minute later.",
+            "46. You can't speak for the next minute. Whenever you try, pink bubbles float out of your mouth.",
+            "47. A spectral horn appears on your head for the next minute. You can use an action to blow it and produce a loud sound audible within 300 feet.",
+            "48. You cast Polymorph on yourself. If you fail the saving throw, you turn into a sheep for the spell's duration.",
+            "49. Illusory butterflies and flower petals flutter in the air within 10 feet of you for the next minute.",
+            "50. You can take one additional action immediately.",
+            "51. Each creature within 30 feet of you takes 1d10 necrotic damage. You regain hit points equal to the sum of the necrotic damage dealt.",
+            "52. You cast Mage Armor on yourself.",
+            "53. You cast Web centered on yourself.",
+            "54. A flumph controlled by the DM appears in an unoccupied space within 5 feet of you, then disappears 1 minute later.",
+            "55. Your arms become tentacles for the next minute, or until you use an action to change them back.",
+            "56. You cast Darkness centered on yourself.",
+            "57. For the next minute, you can cast the Shocking Grasp cantrip as a bonus action on each of your turns.",
+            "58. You cast Enlarge/Reduce on yourself. If you fail the saving throw, you're reduced.",
+            "59. You cast Gaseous Form on yourself, without the concentration requirement.",
+            "60. You become petrified until the start of your next turn.",
+            "61. For the next minute, you can add your spellcasting ability modifier to damage rolls for spells you cast.",
+            "62. You cast Suggestion on yourself, suggesting you dance. You spend your next turn dancing.",
+            "63. You cast Blur on yourself.",
+            "64. A confused owlbear appears in an unoccupied space within 5 feet of you, then disappears 1 minute later.",
+            "65. You cast Haste on yourself.",
+            "66. You cast Slow on yourself.",
+            "67. You cast Crown of Madness on yourself.",
+            "68. You cast Fear centered on yourself.",
+            "69. You cast Tasha's Hideous Laughter on yourself.",
+            "70. You cast Barkskin on yourself.",
+            "71. You cast Spider Climb on yourself.",
+            "72. You cast Jump on yourself.",
+            "73. You cast Expeditious Retreat on yourself.",
+            "74. You cast Longstrider on yourself.",
+            "75. You cast Alter Self on yourself.",
+            "76. You cast Enlarge/Reduce on yourself. If you fail the saving throw, you're enlarged.",
+            "77. You cast Protection from Evil and Good on yourself.",
+            "78. You cast Shield on yourself.",
+            "79. You cast False Life on yourself.",
+            "80. You cast Mage Hand. The hand is neon pink and visible through invisibility.",
+            "81. You cast Comprehend Languages on yourself.",
+            "82. You cast Detect Thoughts on yourself.",
+            "83. You cast See Invisibility on yourself.",
+            "84. You cast Darkvision on yourself.",
+            "85. You cast Knock on the nearest locked door or container.",
+            "86. You cast Arcane Lock on the nearest door or container.",
+            "87. You cast Magic Mouth on the nearest object.",
+            "88. You cast Nystul's Magic Aura on yourself.",
+            "89. You cast Continual Flame on yourself. The flame is an unusual color like black or neon green.",
+            "90. You cast Gentle Repose on yourself.",
+            "91. You cast Magic Weapon on yourself. If you're not holding a weapon, one appears in your hand.",
+            "92. You cast Mirror Image.",
+            "93. You cast Misty Step.",
+            "94. You cast Rope Trick.",
+            "95. You cast Snilloc's Snowball Swarm centered on yourself.",
+            "96. You cast Dragon's Breath on yourself. The damage type is chosen randomly.",
+            "97. You cast Dust Devil centered on yourself.",
+            "98. You cast Earthbind on yourself.",
+            "99. You cast Enhance Ability on yourself. The ability is chosen randomly.",
+            "100. You cast Phantasmal Force on yourself. You believe you're on fire and take 1d6 psychic damage each turn until the effect ends."
+        ];
+
+        // DOM elements
+        const cardBack = document.getElementById('cardBack');
+        const cardFront = document.getElementById('cardFront');
+        const dealButton = document.getElementById('dealButton');
+        const statusBar = document.getElementById('statusBar');
+        const deck = document.querySelector('.deck');
+        
+        // Audio elements
+        const shuffleSound = document.getElementById('shuffleSound');
+        const flipSound = document.getElementById('flipSound');
+        const magicSound = document.getElementById('magicSound');
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const soundToggle = document.getElementById('soundToggle');
+        const musicToggle = document.getElementById('musicToggle');
+        
+        // Game state
+        let rollHistory = [];
+        let isAnimating = false;
+        let autoFlipTimer = null;
+        let shuffleCards = [];
+        let soundEnabled = true;
+        let musicEnabled = true;
+
+        // Set initial sound volumes
+        shuffleSound.volume = 0.5;
+        flipSound.volume = 0.6;
+        magicSound.volume = 0.7;
+        backgroundMusic.volume = 0.3;
+
+        // Initialize audio with improved autoplay handling
+        function initAudio() {
+            // Function to handle audio play
+            const playAudio = () => {
+                backgroundMusic.play()
+                    .then(() => {
+                        musicToggle.textContent = '🎵';
+                        musicToggle.title = 'Background music on';
+                    })
+                    .catch(e => {
+                        console.log("Autoplay prevented:", e);
+                        musicToggle.textContent = '▶️';
+                        musicToggle.title = 'Click to enable music';
+                    });
+            };
+
+            // Try to play immediately
+            playAudio();
+            
+            // Fallback: Try again after user interaction
+            document.addEventListener('click', () => {
+                if (backgroundMusic.paused) {
+                    playAudio();
+                }
+            }, { once: true });
+
+            // Music toggle handler
+            musicToggle.addEventListener('click', () => {
+                if (backgroundMusic.paused) {
+                    backgroundMusic.play()
+                        .then(() => {
+                            musicEnabled = true;
+                            musicToggle.textContent = '🎵';
+                            musicToggle.title = 'Background music on';
+                        })
+                        .catch(e => {
+                            console.log("Couldn't play music:", e);
+                            musicToggle.textContent = '❌';
+                            musicToggle.title = 'Music blocked by browser';
+                        });
+                } else {
+                    backgroundMusic.pause();
+                    musicEnabled = false;
+                    musicToggle.textContent = '🔇';
+                    musicToggle.title = 'Background music off';
+                }
+            });
+        }
+
+        // Create shuffle cards
+        function createShuffleCards() {
+            const animations = ['shuffle1', 'shuffle2', 'shuffle3'];
+            
+            for (let i = 0; i < 5; i++) {
+                const card = document.createElement('div');
+                card.className = 'shuffle-card';
+                card.style.animationName = animations[i % animations.length];
+                card.style.top = `${i * 2}px`;
+                card.style.zIndex = 3 + i;
+                deck.appendChild(card);
+                shuffleCards.push(card);
+            }
+        }
+        
+        // Get a truly random effect
+        function getRandomEffect() {
+            const randomIndex = Math.floor(Math.random() * 100);
+            return {
+                index: randomIndex,
+                effect: wildMagicEffects[randomIndex]
+            };
+        }
+        
+        // Shuffle animation with sound (purely cosmetic)
+        function shuffleDeck() {
+            return new Promise(resolve => {
+                if (soundEnabled) {
+                    shuffleSound.currentTime = 0;
+                    shuffleSound.play().catch(e => console.log("Shuffle sound error:", e));
+                }
+                
+                shuffleCards.forEach((card, i) => {
+                    card.style.display = 'block';
+                    card.style.animationDelay = `${i * 0.1}s`;
+                });
+                
+                setTimeout(() => {
+                    shuffleCards.forEach(card => {
+                        card.style.display = 'none';
+                    });
+                    resolve();
+                }, 1000);
+            });
+        }
+        
+        // Auto-flip card back after 10 seconds
+        function scheduleAutoFlip() {
+            if (autoFlipTimer) clearTimeout(autoFlipTimer);
+            
+            autoFlipTimer = setTimeout(async () => {
+                if (!isAnimating) {
+                    isAnimating = true;
+                    dealButton.disabled = true;
+                    
+                    statusBar.textContent = "Returning card to deck...";
+                    cardBack.style.transform = 'translateX(-50%) translateY(-30px) rotateY(0deg)';
+                    cardFront.style.transform = 'translateX(-50%) translateY(-30px) rotateY(180deg)';
+                    
+                    if (soundEnabled) {
+                        flipSound.currentTime = 0;
+                        flipSound.play().catch(e => console.log("Flip sound error:", e));
+                    }
+                    
+                    await new Promise(r => setTimeout(r, 800));
+                    cardBack.style.transform = 'translateX(-50%) rotateY(0deg)';
+                    await new Promise(r => setTimeout(r, 300));
+                    
+                    statusBar.textContent = "Shuffling deck...";
+                    await shuffleDeck();
+                    
+                    statusBar.textContent = `Ready | Recent: ${rollHistory.map(r => r+1).join(", ")}`;
+                    isAnimating = false;
+                    dealButton.disabled = false;
+                }
+            }, 10000); // 10 seconds
+        }
+        
+        // Deal a card animation
+        async function dealCard() {
+            if (isAnimating) return;
+            isAnimating = true;
+            dealButton.disabled = true;
+            
+            if (autoFlipTimer) clearTimeout(autoFlipTimer);
+            
+            if (cardFront.style.transform === 'translateX(-50%) rotateY(0deg)') {
+                cardFront.style.transform = 'translateX(-50%) rotateY(180deg)';
+                await new Promise(r => setTimeout(r, 800));
+            }
+            
+            const {index: randomIndex, effect} = getRandomEffect();
+            
+            cardFront.innerHTML = `
+                <div class="card-number">#${randomIndex + 1}</div>
+                <div class="card-content">${effect}</div>
+            `;
+            
+            rollHistory.unshift(randomIndex);
+            if (rollHistory.length > 5) {
+                rollHistory.pop();
+            }
+            
+            statusBar.textContent = "Drawing card...";
+            
+            cardBack.style.transform = 'translateX(-50%) translateY(-30px) rotateY(0deg)';
+            await new Promise(r => setTimeout(r, 300));
+            
+            statusBar.textContent = "Revealing your magic surge...";
+            if (soundEnabled) {
+                flipSound.currentTime = 0;
+                flipSound.play().catch(e => console.log("Flip sound error:", e));
+            }
+            
+            cardBack.style.transform = 'translateX(-50%) translateY(-30px) rotateY(180deg)';
+            cardFront.style.transform = 'translateX(-50%) translateY(-30px) rotateY(0deg)';
+            await new Promise(r => setTimeout(r, 400));
+            
+            if (soundEnabled) {
+                magicSound.currentTime = 0;
+                magicSound.play().catch(e => console.log("Magic sound error:", e));
+            }
+            
+            await new Promise(r => setTimeout(r, 400));
+            
+            statusBar.textContent = `Effect #${randomIndex + 1} (auto-flip in 10s)`;
+            isAnimating = false;
+            dealButton.disabled = false;
+            
+            scheduleAutoFlip();
+        }
+        
+        // Initialize
+        function init() {
+            createShuffleCards();
+            cardFront.style.transform = 'translateX(-50%) rotateY(180deg)';
+            initAudio();
+            
+            soundToggle.addEventListener('click', () => {
+                soundEnabled = !soundEnabled;
+                soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
+                soundToggle.title = soundEnabled ? 'Sound effects on' : 'Sound effects off';
+                if (soundEnabled) {
+                    flipSound.currentTime = 0;
+                    flipSound.play().catch(e => console.log("Test sound error:", e));
+                }
+            });
+
+            dealButton.addEventListener('click', dealCard);
+            document.addEventListener('keydown', (e) => {
+                if (e.code === 'Space' || e.code === 'Enter') {
+                    dealCard();
+                }
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>
