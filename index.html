@@ -27,6 +27,7 @@
             background-size: cover;
             min-height: 100vh;
             font-size: 1.15em;
+            user-select: none;
         }
         
         .container {
@@ -79,6 +80,7 @@
             background-size: cover;
             background-position: center;
             border: 2px solid rgba(102, 0, 0, 0.3);
+            cursor: pointer;
         }
         
         .card-back {
@@ -89,14 +91,14 @@
         
         .card-front {
             background-image: url('images/card-front.png');
-            padding: 20px;
+            padding: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
             color: #3a2c1a;
             font-family: 'Veinline', serif;
-            font-size: 1.65em;
+            font-size: 1.85em; /* Increased by 40% */
             transform: translateX(-50%) rotateY(180deg);
             z-index: 1;
             overflow: hidden;
@@ -104,9 +106,9 @@
         
         .card-content {
             line-height: 1.5;
-            max-height: 320px;
+            max-height: 340px;
             overflow-y: auto;
-            padding: 10px;
+            padding: 5px;
             width: 100%;
         }
         
@@ -114,35 +116,10 @@
             position: absolute;
             top: 15px;
             left: 15px;
-            font-size: 38px;
+            font-size: 42px; /* Increased size */
             font-weight: bold;
             color: #8b0000;
             font-family: 'Veinline', serif;
-        }
-        
-        button {
-            background-color: rgba(102, 0, 0, 0.9);
-            color: white;
-            border: none;
-            padding: 20px 40px;
-            font-size: 1.5875em;
-            font-weight: bold;
-            border-radius: 50px;
-            cursor: pointer;
-            margin: 30px 0;
-            transition: all 0.3s;
-            font-family: 'Blackjack', cursive;
-            border: 2px solid rgba(0, 0, 0, 0.2);
-        }
-        
-        button:hover {
-            background-color: rgba(82, 0, 0, 0.9);
-            transform: scale(1.05);
-        }
-        
-        button:disabled {
-            background-color: rgba(102, 102, 102, 0.9);
-            cursor: not-allowed;
         }
         
         .status-bar {
@@ -179,6 +156,7 @@
             display: none;
             animation-duration: 0.4s;
             animation-iteration-count: infinite;
+            cursor: pointer;
         }
         
         @keyframes shuffle1 {
@@ -263,24 +241,19 @@
                 font-size: 1.3em;
             }
             
-            button {
-                padding: 15px 30px;
-                font-size: 1.3em;
-            }
-            
             .card-content {
-                font-size: 1.4em;
-                padding: 8px;
-                max-height: 260px;
+                font-size: 1.6em;
+                padding: 5px;
+                max-height: 280px;
             }
             
             .card-front {
-                padding: 15px;
-                font-size: 1.4em;
+                padding: 10px;
+                font-size: 1.6em;
             }
             
             .card-number {
-                font-size: 32px;
+                font-size: 36px;
                 top: 10px;
                 left: 10px;
             }
@@ -290,7 +263,7 @@
 <body>
     <div class="container">
         <h1>WILD MAGIC SURGE</h1>
-        <div class="subtitle">Draw a card to reveal your chaotic effect</div>
+        <div class="subtitle">Touch the card to reveal your chaotic effect</div>
         
         <div class="deck-area">
             <div class="deck">
@@ -300,10 +273,8 @@
             </div>
         </div>
         
-        <button id="dealButton">DRAW CARD</button>
-        
         <div class="status-bar" id="statusBar">
-            Deck ready - click DRAW CARD to begin
+            Deck ready - touch the card to begin
         </div>
     </div>
 
@@ -316,7 +287,7 @@
     <audio id="magicSound" preload="auto">
         <source src="sounds/magic.mp3" type="audio/mpeg">
     </audio>
-    <audio id="backgroundMusic" loop preload="auto">
+    <audio id="backgroundMusic" loop preload="auto" autoplay muted>
         <source src="sounds/background.mp3" type="audio/mpeg">
     </audio>
 
@@ -430,17 +401,14 @@
         // DOM elements
         const cardBack = document.getElementById('cardBack');
         const cardFront = document.getElementById('cardFront');
-        const dealButton = document.getElementById('dealButton');
         const statusBar = document.getElementById('statusBar');
         const deck = document.querySelector('.deck');
-        
-        // Audio elements
-        const shuffleSound = document.getElementById('shuffleSound');
-        const flipSound = document.getElementById('flipSound');
-        const magicSound = document.getElementById('magicSound');
         const backgroundMusic = document.getElementById('backgroundMusic');
         const soundToggle = document.getElementById('soundToggle');
         const musicToggle = document.getElementById('musicToggle');
+        const shuffleSound = document.getElementById('shuffleSound');
+        const flipSound = document.getElementById('flipSound');
+        const magicSound = document.getElementById('magicSound');
         
         // Game state
         let rollHistory = [];
@@ -456,53 +424,35 @@
         magicSound.volume = 0.7;
         backgroundMusic.volume = 0.3;
 
-        // Initialize audio with improved autoplay handling
+        // Initialize audio with autoplay
         function initAudio() {
-            // Function to handle audio play
-            const playAudio = () => {
-                backgroundMusic.play()
-                    .then(() => {
-                        musicToggle.textContent = '🎵';
-                        musicToggle.title = 'Background music on';
-                    })
-                    .catch(e => {
-                        console.log("Autoplay prevented:", e);
-                        musicToggle.textContent = '▶️';
-                        musicToggle.title = 'Click to enable music';
-                    });
-            };
+            // Create silent audio context to unlock audio
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            const audioContext = new AudioContext();
+            const buffer = audioContext.createBuffer(1, 1, 22050);
+            const source = audioContext.createBufferSource();
+            source.buffer = buffer;
+            source.connect(audioContext.destination);
+            source.start();
 
-            // Try to play immediately
-            playAudio();
-            
-            // Fallback: Try again after user interaction
-            document.addEventListener('click', () => {
-                if (backgroundMusic.paused) {
-                    playAudio();
-                }
-            }, { once: true });
+            // Try to play background music
+            backgroundMusic.play()
+                .then(() => {
+                    musicToggle.textContent = '🎵';
+                    musicToggle.title = 'Background music on';
+                })
+                .catch(e => {
+                    console.log("Autoplay blocked:", e);
+                    // Fallback: Play after user interaction
+                    document.addEventListener('click', () => {
+                        backgroundMusic.play();
+                    }, { once: true });
+                });
 
-            // Music toggle handler
-            musicToggle.addEventListener('click', () => {
-                if (backgroundMusic.paused) {
-                    backgroundMusic.play()
-                        .then(() => {
-                            musicEnabled = true;
-                            musicToggle.textContent = '🎵';
-                            musicToggle.title = 'Background music on';
-                        })
-                        .catch(e => {
-                            console.log("Couldn't play music:", e);
-                            musicToggle.textContent = '❌';
-                            musicToggle.title = 'Music blocked by browser';
-                        });
-                } else {
-                    backgroundMusic.pause();
-                    musicEnabled = false;
-                    musicToggle.textContent = '🔇';
-                    musicToggle.title = 'Background music off';
-                }
-            });
+            // Unmute after a short delay
+            setTimeout(() => {
+                backgroundMusic.muted = false;
+            }, 500);
         }
 
         // Create shuffle cards
@@ -520,7 +470,7 @@
             }
         }
         
-        // Get a truly random effect
+        // Get random effect
         function getRandomEffect() {
             const randomIndex = Math.floor(Math.random() * 100);
             return {
@@ -529,7 +479,7 @@
             };
         }
         
-        // Shuffle animation with sound (purely cosmetic)
+        // Shuffle animation
         function shuffleDeck() {
             return new Promise(resolve => {
                 if (soundEnabled) {
@@ -558,7 +508,6 @@
             autoFlipTimer = setTimeout(async () => {
                 if (!isAnimating) {
                     isAnimating = true;
-                    dealButton.disabled = true;
                     
                     statusBar.textContent = "Returning card to deck...";
                     cardBack.style.transform = 'translateX(-50%) translateY(-30px) rotateY(0deg)';
@@ -578,16 +527,14 @@
                     
                     statusBar.textContent = `Ready | Recent: ${rollHistory.map(r => r+1).join(", ")}`;
                     isAnimating = false;
-                    dealButton.disabled = false;
                 }
-            }, 10000); // 10 seconds
+            }, 10000);
         }
         
-        // Deal a card animation
+        // Deal a card when clicked/tapped
         async function dealCard() {
             if (isAnimating) return;
             isAnimating = true;
-            dealButton.disabled = true;
             
             if (autoFlipTimer) clearTimeout(autoFlipTimer);
             
@@ -632,7 +579,6 @@
             
             statusBar.textContent = `Effect #${randomIndex + 1} (auto-flip in 10s)`;
             isAnimating = false;
-            dealButton.disabled = false;
             
             scheduleAutoFlip();
         }
@@ -643,17 +589,40 @@
             cardFront.style.transform = 'translateX(-50%) rotateY(180deg)';
             initAudio();
             
+            // Make card clickable
+            cardBack.addEventListener('click', dealCard);
+            cardFront.addEventListener('click', dealCard);
+            
+            // Sound toggle
             soundToggle.addEventListener('click', () => {
                 soundEnabled = !soundEnabled;
                 soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
                 soundToggle.title = soundEnabled ? 'Sound effects on' : 'Sound effects off';
-                if (soundEnabled) {
-                    flipSound.currentTime = 0;
-                    flipSound.play().catch(e => console.log("Test sound error:", e));
+            });
+
+            // Music toggle
+            musicToggle.addEventListener('click', () => {
+                if (backgroundMusic.paused) {
+                    backgroundMusic.play()
+                        .then(() => {
+                            musicEnabled = true;
+                            musicToggle.textContent = '🎵';
+                            musicToggle.title = 'Background music on';
+                        })
+                        .catch(e => {
+                            console.log("Couldn't play music:", e);
+                            musicToggle.textContent = '❌';
+                            musicToggle.title = 'Music blocked by browser';
+                        });
+                } else {
+                    backgroundMusic.pause();
+                    musicEnabled = false;
+                    musicToggle.textContent = '🔇';
+                    musicToggle.title = 'Background music off';
                 }
             });
 
-            dealButton.addEventListener('click', dealCard);
+            // Keyboard support
             document.addEventListener('keydown', (e) => {
                 if (e.code === 'Space' || e.code === 'Enter') {
                     dealCard();
